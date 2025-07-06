@@ -15,26 +15,17 @@ namespace LargeLayoutOnly
     {
         private EntityQuery SettingSelectors;
 
-        // BaseNetworkTransport<INetworkTarget, ILiveness> NetworkTransport;
-
         protected override void Initialise()
         {
             base.Initialise();
             SettingSelectors = GetEntityQuery(typeof(CSettingSelector));
-
-
         }
 
         protected override void OnUpdate()
         {
-            INetworkTransport transport = NetworkPlatforms.Get<INetworkPlatform>() as INetworkTransport;
-            if (transport != null && !transport.IsHosting)
-            {
-                return;
-            }
-                int settingId = CSettingSelector.IDFromQuery(SettingSelectors);
-                RestaurantSetting restaurantSetting = GameData.Main.Get<RestaurantSetting>(settingId);
-                restaurantSetting.ForceLayout = GameData.Main.Get<LayoutProfile>(AssetReference.HugeLayout);
+            int settingId = CSettingSelector.IDFromQuery(SettingSelectors);
+            RestaurantSetting restaurantSetting = GameData.Main.Get<RestaurantSetting>(settingId);
+            restaurantSetting.ForceLayout = GameData.Main.Get<LayoutProfile>(AssetReference.HugeLayout);
         }
     }
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Kitchen;
 using KitchenData;
 using KitchenMods;
@@ -6,11 +7,12 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
-namespace LargeLayoutOnly
+namespace LargeLayoutsOnly
 {
     public class PopulateMapPedestals : FranchiseSystem, IModSystem
     {
         private EntityQuery LayoutSlots;
+        private EntityQuery MapItems;
         private EntityQuery SettingSelectors;
         private int SettingsId;
 
@@ -18,6 +20,7 @@ namespace LargeLayoutOnly
         {
             base.Initialise();
             LayoutSlots = GetEntityQuery(typeof(CreateLayoutSlotsPatch.CLayoutSlot), typeof(CItemHolder));
+            MapItems = GetEntityQuery(typeof(CItemLayoutMap), typeof(CClearOnLayoutRequest));
             SettingSelectors = GetEntityQuery(typeof(CSettingSelector));
             SettingsId = CSettingSelector.IDFromQuery(SettingSelectors);
         }
@@ -33,23 +36,29 @@ namespace LargeLayoutOnly
 
             SettingsId = settingId;
 
+            EntityManager.DestroyEntity(MapItems);
+
             NativeArray<Entity> pedestalEntities = LayoutSlots.ToEntityArray(Allocator.Temp);
 
             foreach (Entity pedestal in pedestalEntities)
             {
                 if (Require(pedestal, out CItemHolder itemHolder))
                 {
-                    EntityManager.DestroyEntity(itemHolder.HeldItem);
-
                     int randomSeed = Random.Range(int.MinValue, int.MaxValue);
                     var layoutSeed = new LayoutSeed(randomSeed, new[] { AssetReference.HugeLayout });
-                    Entity mapItem = layoutSeed.GenerateMap(EntityManager, settingId);
+                    Entity map = layoutSeed.GenerateMap(EntityManager, settingId);
 
-                    EntityManager.SetComponentData<CItemHolder>(pedestal, mapItem);
-                    EntityManager.SetComponentData<CHeldBy>(mapItem, pedestal);
-                    EntityManager.AddComponentData<CHome>(mapItem, pedestal);
+                    EntityManager.AddComponent<CClearOnLayoutRequest>(map);
+                    EntityManager.SetComponentData<CItemHolder>(pedestal, map);
+                    EntityManager.SetComponentData<CHeldBy>(map, pedestal);
+                    EntityManager.SetComponentData<CHome>(map, pedestal);
                 }
             }
+        }
+
+        [StructLayout(LayoutKind.Sequential, Size = 1)]
+        private struct CClearOnLayoutRequest : IComponentData
+        {
         }
     }
 
@@ -101,6 +110,7 @@ namespace LargeLayoutOnly
             entityManager.SetComponentData(entity, new CPosition(location));
         }
 
+        [StructLayout(LayoutKind.Sequential, Size = 1)]
         public struct CLayoutSlot : IComponentData
         {
         }

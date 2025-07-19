@@ -1,118 +1,78 @@
-﻿using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Kitchen;
+﻿using Kitchen;
 using KitchenData;
 using KitchenMods;
+using System.Collections.Generic;
+using System.Reflection;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
 namespace LargeLayoutsOnly
 {
-    public class PopulateMapPedestals : FranchiseSystem, IModSystem
-    {
-        private EntityQuery LayoutSlots;
-        private EntityQuery MapItems;
-        private EntityQuery SettingSelectors;
-        private int SettingsId;
+	[UpdateBefore(typeof(HandleLayoutRequests))]
+	public class FilterLayoutUpgrades : FranchiseSystem, IModSystem
+	{
+		private EntityQuery LayoutUpgrades;
 
-        protected override void Initialise()
-        {
-            base.Initialise();
-            LayoutSlots = GetEntityQuery(typeof(CreateLayoutSlotsPatch.CLayoutSlot), typeof(CItemHolder));
-            MapItems = GetEntityQuery(typeof(CItemLayoutMap), typeof(CClearOnLayoutRequest));
-            SettingSelectors = GetEntityQuery(typeof(CSettingSelector));
-            SettingsId = CSettingSelector.IDFromQuery(SettingSelectors);
-        }
+		protected override void Initialise()
+		{
+			base.Initialise();
+			LayoutUpgrades = GetEntityQuery(typeof(CLayoutUpgrade));
+		}
 
-        protected override void OnUpdate()
-        {
-            int settingId = CSettingSelector.IDFromQuery(SettingSelectors);
-
-            if (settingId == SettingsId)
+		protected override void OnUpdate()
+		{
+			using (NativeArray<Entity> entities = LayoutUpgrades.ToEntityArray(Allocator.Temp))
+			using (NativeArray<CLayoutUpgrade> upgrades = LayoutUpgrades.ToComponentDataArray<CLayoutUpgrade>(Allocator.Temp))
             {
-                return;
-            }
-
-            SettingsId = settingId;
-
-            EntityManager.DestroyEntity(MapItems);
-
-            NativeArray<Entity> pedestalEntities = LayoutSlots.ToEntityArray(Allocator.Temp);
-
-            foreach (Entity pedestal in pedestalEntities)
-            {
-                if (Require(pedestal, out CItemHolder itemHolder))
+                for (int i = 0; i < upgrades.Length; i++)
                 {
-                    int randomSeed = Random.Range(int.MinValue, int.MaxValue);
-                    var layoutSeed = new LayoutSeed(randomSeed, new[] { AssetReference.HugeLayout });
-                    Entity map = layoutSeed.GenerateMap(EntityManager, settingId);
-
-                    EntityManager.AddComponent<CClearOnLayoutRequest>(map);
-                    EntityManager.SetComponentData<CItemHolder>(pedestal, map);
-                    EntityManager.SetComponentData<CHeldBy>(map, pedestal);
-                    EntityManager.SetComponentData<CHome>(map, pedestal);
+                    if (upgrades[i].LayoutID != AssetReference.HugeLayout)
+                    {
+						EntityManager.DestroyEntity(entities[i]);
+                    }
                 }
             }
         }
+	}
 
-        [StructLayout(LayoutKind.Sequential, Size = 1)]
-        private struct CClearOnLayoutRequest : IComponentData
-        {
-        }
-    }
+	[UpdateAfter(typeof(CreateOffice))]
+	public class CreateLayoutSlotsPatch : FranchiseFirstFrameSystem, IModSystem
+	{
+		private EntityQuery LayoutSizeUpgrades;
+		private CreateLayoutSlots LayoutSlotsSystem;
 
-    [UpdateAfter(typeof(CreateOffice))]
-    public class CreateLayoutSlotsPatch : FranchiseFirstFrameSystem, IModSystem
-    {
-        private EntityQuery LayoutSizeUpgrades;
-        private CreateLayoutSlots LayoutSlotsSystem;
+		protected override void Initialise()
+		{
+			base.Initialise();
+			LayoutSizeUpgrades = GetEntityQuery(typeof(CUpgradeExtraLayout));
+			LayoutSlotsSystem = World.GetExistingSystem<CreateLayoutSlots>();
 
-        protected override void Initialise()
-        {
-            base.Initialise();
-            LayoutSizeUpgrades = GetEntityQuery(typeof(CUpgradeExtraLayout));
-            LayoutSlotsSystem = World.GetExistingSystem<CreateLayoutSlots>();
+			if (LayoutSlotsSystem != null)
+			{
+				LayoutSlotsSystem.Enabled = false;
+			}
+		}
 
-            if (LayoutSlotsSystem != null)
-            {
-                LayoutSlotsSystem.Enabled = false;
-            }
-        }
+		protected override void OnUpdate()
+		{
+			MethodInfo method = typeof(CreateLayoutSlots).GetMethod("CreateMapSource", BindingFlags.Instance | BindingFlags.NonPublic);
 
-        protected override void OnUpdate()
-        {
-            Vector3 office = LobbyPositionAnchors.Office;
-            List<Vector3> list = new List<Vector3>
-            {
-                new Vector3(-0f, 0f, -5f),
-                new Vector3(-1f, 0f, -5f),
-                new Vector3(-2f, 0f, -5f),
-                new Vector3(-3f, 0f, -5f),
-                new Vector3(-4f, 0f, -5f),
-                new Vector3(-4f, 0f, -4f)
-            };
+			Vector3 office = LobbyPositionAnchors.Office;
+			List<Vector3> list = new List<Vector3>
+			{
+				new Vector3(-0f, 0f, -5f),
+				new Vector3(-1f, 0f, -5f),
+				new Vector3(-2f, 0f, -5f),
+				new Vector3(-3f, 0f, -5f),
+				new Vector3(-4f, 0f, -5f),
+				new Vector3(-4f, 0f, -4f)
+			};
 
-            for (int i = 0; i < Mathf.Min(6, 4 + LayoutSizeUpgrades.CalculateEntityCount()); i++)
-            {
-                CreateMapSource(office + list[i]);
-            }
-        }
-
-        private void CreateMapSource(Vector3 location)
-        {
-            EntityManager entityManager = EntityManager;
-            Entity entity = entityManager.CreateEntity(typeof(CCreateAppliance), typeof(CPosition), typeof(CItemHolder), typeof(CLayoutSlot));
-            entityManager.SetComponentData(entity, new CCreateAppliance
-            {
-                ID = AssetReference.LayoutPedestal
-            });
-            entityManager.SetComponentData(entity, new CPosition(location));
-        }
-
-        [StructLayout(LayoutKind.Sequential, Size = 1)]
-        public struct CLayoutSlot : IComponentData
-        {
-        }
-    }
+			for (int i = 0; i < Mathf.Min(6, 4 + LayoutSizeUpgrades.CalculateEntityCount()); i++)
+			{
+				method.Invoke(LayoutSlotsSystem, new object[] { office + list[i] });
+			}
+		}
+	}
 }

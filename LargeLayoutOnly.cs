@@ -20,21 +20,20 @@ namespace LargeLayoutsOnly
 			LayoutUpgrades = GetEntityQuery(typeof(CLayoutUpgrade));
 		}
 
-		protected override void OnUpdate()
-		{
-			using (NativeArray<Entity> entities = LayoutUpgrades.ToEntityArray(Allocator.Temp))
-			using (NativeArray<CLayoutUpgrade> upgrades = LayoutUpgrades.ToComponentDataArray<CLayoutUpgrade>(Allocator.Temp))
+        protected override void OnUpdate()
+        {
+            using (NativeArray<Entity> entities = LayoutUpgrades.ToEntityArray(Allocator.Temp))
             {
-                for (int i = 0; i < upgrades.Length; i++)
+                EntityManager.DestroyEntity(entities);
+
+                Entity layoutUpgrade = EntityManager.CreateEntity(typeof(CLayoutUpgrade));
+                EntityManager.SetComponentData(layoutUpgrade, new CLayoutUpgrade
                 {
-                    if (upgrades[i].LayoutID != AssetReference.HugeLayout)
-                    {
-						EntityManager.DestroyEntity(entities[i]);
-                    }
-                }
+                    LayoutID = AssetReference.HugeLayout
+                });
             }
         }
-	}
+    }
 
 	[UpdateAfter(typeof(CreateOffice))]
 	public class CreateLayoutSlotsPatch : FranchiseFirstFrameSystem, IModSystem

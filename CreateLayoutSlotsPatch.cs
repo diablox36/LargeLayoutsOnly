@@ -1,42 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using Kitchen;
+using KitchenMods;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Kitchen;
-using KitchenData;
-using KitchenMods;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using static Kitchen.CreateLayoutSlots;
 
-namespace LargeLayoutsOnly
+namespace LargeLayoutsOnly.Systems
 {
-    [UpdateBefore(typeof(HandleLayoutRequests))]
-    public class FilterLayoutUpgrades : FranchiseSystem, IModSystem
-    {
-        private EntityQuery LayoutUpgrades;
-
-        protected override void Initialise()
-        {
-            base.Initialise();
-            LayoutUpgrades = GetEntityQuery(typeof(CLayoutUpgrade));
-        }
-
-        protected override void OnUpdate()
-        {
-            using (NativeArray<Entity> entities = LayoutUpgrades.ToEntityArray(Allocator.Temp))
-            {
-                EntityManager.DestroyEntity(entities);
-
-                Entity layoutUpgrade = EntityManager.CreateEntity(typeof(CLayoutUpgrade));
-                EntityManager.SetComponentData(layoutUpgrade, new CLayoutUpgrade
-                {
-                    LayoutID = AssetReference.HugeLayout
-                });
-            }
-        }
-    }
-
     [UpdateAfter(typeof(CreateOffice))]
     public class CreateLayoutSlotsPatch : FranchiseFirstFrameSystem, IModSystem
     {

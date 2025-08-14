@@ -13,8 +13,10 @@ namespace LargeLayoutsOnly
     [UpdateAfter(typeof(CreateOffice))]
     public class CreateLayoutSlotsPatch : FranchiseFirstFrameSystem, IModSystem
     {
-        private EntityQuery LayoutSizeUpgrades;
         private EntityQuery LayoutSlots;
+
+        private EntityQuery LayoutSizeUpgrades;
+
         private CreateLayoutSlots LayoutSlotsSystem;
 
         protected override void Initialise()
@@ -43,6 +45,7 @@ namespace LargeLayoutsOnly
             CreateLayoutRefresher();
             CreateLayoutSlots();
         }
+
         private void CreateLayoutSlots()
         {
             MethodInfo method = typeof(CreateLayoutSlots).GetMethod("CreateMapSource", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -63,6 +66,7 @@ namespace LargeLayoutsOnly
                 method?.Invoke(LayoutSlotsSystem, new object[] { office + list[i] });
             }
         }
+
         private void CreateLayoutRefresher()
         {
             Vector3 position = LobbyPositionAnchors.Office + new Vector3(-4f, 0f, -2f);

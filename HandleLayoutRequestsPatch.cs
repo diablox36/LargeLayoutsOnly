@@ -21,6 +21,7 @@ namespace LargeLayoutsOnly
         private EntityQuery MapItems;
 
         private EntityQuery SettingSelectors;
+
         private HandleLayoutRequests HandleLayoutSystem;
 
         public static bool Initialised { get; private set; }
@@ -45,21 +46,21 @@ namespace LargeLayoutsOnly
 
         protected override void OnUpdate()
         {
-            if (!Require<HandleLayoutRequests.SLayoutRequest>(out var comp) || comp.HasBeenCreated)
+            if (!Require(out HandleLayoutRequests.SLayoutRequest comp) || comp.HasBeenCreated)
             {
                 return;
             }
 
-            base.EntityManager.DestroyEntity(MapItems);
-            int setting_id = CSettingSelector.IDFromQuery(SettingSelectors);
+            EntityManager.DestroyEntity(MapItems);
+            int settingId = CSettingSelector.IDFromQuery(SettingSelectors);
             using (NativeArray<Entity> nativeArray = Slots.ToEntityArray(Allocator.Temp))
             {
                 foreach (Entity item in nativeArray)
                 {
                     int source = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
-                    LayoutSeed ls = new LayoutSeed(source, new[] { AssetReference.HugeLayout });
+                    var ls = new LayoutSeed(source, new[] { AssetReference.HugeLayout });
 
-                    Entity entity = ls.GenerateMap(base.EntityManager, setting_id);
+                    Entity entity = ls.GenerateMap(EntityManager, settingId);
                     EntityManager.AddComponent<CClearOnLayoutRequest>(entity);
                     EntityManager.SetComponentData(item, (CItemHolder)entity);
                     EntityManager.SetComponentData(entity, (CHeldBy)item);
@@ -71,6 +72,5 @@ namespace LargeLayoutsOnly
                 Initialised = true;
             }
         }
-
     }
 }

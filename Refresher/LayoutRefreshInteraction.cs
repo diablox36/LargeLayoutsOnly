@@ -1,8 +1,6 @@
 ﻿using Kitchen;
 using KitchenData;
 using KitchenMods;
-using System;
-using System.Linq;
 using Unity.Collections;
 using Unity.Entities;
 
@@ -12,8 +10,11 @@ namespace LargeLayoutsOnly
     public class LayoutRefreshInteraction : InteractionSystem, IModSystem
     {
         private CItemHolder ItemHolder;
+
         private EntityQuery LayoutSlots;
+
         private EntityQuery MapItems;
+
         private EntityQuery SettingSelectors;
 
         protected override void Initialise()
@@ -27,7 +28,9 @@ namespace LargeLayoutsOnly
         protected override bool IsPossible(ref InteractionData data)
         {
             if (!Require(data.Target, out ItemHolder))
+            {
                 return false;
+            }
 
             return Has<CLayoutRefresher>(data.Target) && ItemHolder.HeldItem == Entity.Null;
         }
@@ -42,7 +45,7 @@ namespace LargeLayoutsOnly
                 foreach (Entity slotEntity in slotEntities)
                 {
                     int randomSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
-                    LayoutSeed layoutSeed = new LayoutSeed(randomSeed, new[] { AssetReference.HugeLayout });
+                    var layoutSeed = new LayoutSeed(randomSeed, new[] { AssetReference.HugeLayout });
 
                     Entity mapEntity = layoutSeed.GenerateMap(EntityManager, settingId);
 

@@ -13,11 +13,6 @@ namespace LargeLayoutsOnly
     [UpdateAfter(typeof(CreateOffice))]
     public class LayoutRefreshAppliance : FranchiseFirstFrameSystem, IModSystem
     {
-        protected override void Initialise()
-        {
-            base.Initialise();
-        }
-
         protected override void OnUpdate()
         {
             Vector3 position = LobbyPositionAnchors.Office + new Vector3(-4f, 0f, -2f);

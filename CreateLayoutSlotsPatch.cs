@@ -8,7 +8,7 @@ using Unity.Entities;
 using UnityEngine;
 using static Kitchen.CreateLayoutSlots;
 
-namespace LargeLayoutsOnly.Systems
+namespace LargeLayoutsOnly
 {
     [UpdateAfter(typeof(CreateOffice))]
     public class CreateLayoutSlotsPatch : FranchiseFirstFrameSystem, IModSystem
@@ -40,6 +40,11 @@ namespace LargeLayoutsOnly.Systems
                 }
             }
 
+            CreateLayoutRefresher();
+            CreateLayoutSlots();
+        }
+        private void CreateLayoutSlots()
+        {
             MethodInfo method = typeof(CreateLayoutSlots).GetMethod("CreateMapSource", BindingFlags.Instance | BindingFlags.NonPublic);
 
             Vector3 office = LobbyPositionAnchors.Office;
@@ -57,6 +62,17 @@ namespace LargeLayoutsOnly.Systems
             {
                 method?.Invoke(LayoutSlotsSystem, new object[] { office + list[i] });
             }
+        }
+        private void CreateLayoutRefresher()
+        {
+            Vector3 position = LobbyPositionAnchors.Office + new Vector3(-4f, 0f, -2f);
+            Entity entity = EntityManager.CreateEntity(
+                typeof(CPosition),
+                typeof(CLayoutRefresher)
+            );
+
+            EntityManager.SetComponentData(entity, new CPosition(position));
+            EntityManager.SetComponentData(entity, new CLayoutRefresher());
         }
     }
 }

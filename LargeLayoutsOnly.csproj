@@ -46,9 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HandleLayoutRequestsPatch.cs" />
+    <Compile Include="Refresher\LayoutRefreshAppliance.cs" />
+    <Compile Include="Refresher\LayoutRefreshInteraction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CreateLayoutSlotsPatch.cs" />
-    <Compile Include="FilterLayoutUpgrades.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

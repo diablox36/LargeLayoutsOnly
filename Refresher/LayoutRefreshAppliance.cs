@@ -15,7 +15,7 @@ namespace LargeLayoutsOnly
     {
         protected override void OnUpdate()
         {
-            Vector3 position = LobbyPositionAnchors.Office + new Vector3(-4f, 0f, -2f);
+            Vector3 position = LobbyPositionAnchors.Office + new Vector3(-4f, -0.3f, -2f);
 
             Entity entity = EntityManager.CreateEntity(
                 typeof(CCreateAppliance),
@@ -25,7 +25,7 @@ namespace LargeLayoutsOnly
 
             EntityManager.SetComponentData(entity, new CCreateAppliance
             {
-                ID = AssetReference.Counter
+                ID = AssetReference.ResearchAppliance
             });
 
             EntityManager.SetComponentData(entity, new CPosition(position));

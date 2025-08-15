@@ -33,10 +33,9 @@ namespace LargeLayoutsOnly
             Slots = GetEntityQuery(typeof(CreateLayoutSlots.CLayoutSlot), typeof(CItemHolder));
             MapItems = GetEntityQuery(typeof(CItemLayoutMap), typeof(CClearOnLayoutRequest));
             SettingSelectors = GetEntityQuery(typeof(CSettingSelector));
+            HandleLayoutSystem = World.GetExistingSystem<HandleLayoutRequests>();
             RequireForUpdate(Requests);
             RequireForUpdate(Slots);
-
-            HandleLayoutSystem = World.GetExistingSystem<HandleLayoutRequests>();
 
             if (HandleLayoutSystem != null)
             {

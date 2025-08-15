@@ -4,7 +4,7 @@ using KitchenMods;
 using Unity.Collections;
 using Unity.Entities;
 
-namespace LargeLayoutsOnly
+namespace LargeLayoutsOnly.Refresher
 {
     [UpdateInGroup(typeof(InteractionGroup))]
     public class LayoutRefreshInteraction : InteractionSystem, IModSystem

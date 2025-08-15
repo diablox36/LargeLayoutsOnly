@@ -4,14 +4,14 @@ using KitchenMods;
 using Unity.Entities;
 using UnityEngine;
 
-namespace LargeLayoutsOnly
+namespace LargeLayoutsOnly.Refresher
 {
     public struct CLayoutRefresher : IComponentData
     {
     }
 
     [UpdateAfter(typeof(CreateOffice))]
-    public class LayoutRefreshAppliance : FranchiseFirstFrameSystem, IModSystem
+    public class CreateLayoutRefresher : FranchiseFirstFrameSystem, IModSystem
     {
         protected override void OnUpdate()
         {

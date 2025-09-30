@@ -4,6 +4,7 @@ using KitchenMods;
 using System.Runtime.InteropServices;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace LargeLayoutsOnly
 {
@@ -56,8 +57,8 @@ namespace LargeLayoutsOnly
             {
                 foreach (Entity item in nativeArray)
                 {
-                    int source = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
-                    var ls = new LayoutSeed(source, new[] { AssetReference.HugeLayout });
+                    int randomSeed = Random.Range(int.MinValue, int.MaxValue);
+                    var ls = new LayoutSeed(randomSeed, new[] { AssetReference.HugeLayout });
 
                     Entity entity = ls.GenerateMap(EntityManager, settingId);
                     EntityManager.AddComponent<CClearOnLayoutRequest>(entity);

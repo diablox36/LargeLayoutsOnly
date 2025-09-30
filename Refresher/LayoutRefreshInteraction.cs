@@ -3,6 +3,7 @@ using KitchenData;
 using KitchenMods;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace LargeLayoutsOnly.Refresher
 {
@@ -40,19 +41,18 @@ namespace LargeLayoutsOnly.Refresher
             EntityManager.DestroyEntity(MapItems);
             int settingId = CSettingSelector.IDFromQuery(SettingSelectors);
 
-            using (NativeArray<Entity> slotEntities = LayoutSlots.ToEntityArray(Allocator.Temp))
+            using (NativeArray<Entity> nativeArray = LayoutSlots.ToEntityArray(Allocator.Temp))
             {
-                foreach (Entity slotEntity in slotEntities)
+                foreach (Entity item in nativeArray)
                 {
-                    int randomSeed = UnityEngine.Random.Range(int.MinValue, int.MaxValue);
-                    var layoutSeed = new LayoutSeed(randomSeed, new[] { AssetReference.HugeLayout });
+                    int randomSeed = Random.Range(int.MinValue, int.MaxValue);
+                    var ls = new LayoutSeed(randomSeed, new[] { AssetReference.HugeLayout });
 
-                    Entity mapEntity = layoutSeed.GenerateMap(EntityManager, settingId);
-
-                    EntityManager.AddComponent<HandleLayoutRequestsPatch.CClearOnLayoutRequest>(mapEntity);
-                    EntityManager.SetComponentData(slotEntity, (CItemHolder)mapEntity);
-                    EntityManager.SetComponentData(mapEntity, (CHeldBy)slotEntity);
-                    EntityManager.SetComponentData(mapEntity, (CHome)slotEntity);
+                    Entity entity = ls.GenerateMap(EntityManager, settingId);
+                    EntityManager.AddComponent<HandleLayoutRequestsPatch.CClearOnLayoutRequest>(entity);
+                    EntityManager.SetComponentData(item, (CItemHolder)entity);
+                    EntityManager.SetComponentData(entity, (CHeldBy)item);
+                    EntityManager.SetComponentData(entity, (CHome)item);
                 }
             }
         }

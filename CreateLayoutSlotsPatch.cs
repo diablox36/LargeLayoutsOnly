@@ -47,12 +47,12 @@ namespace LargeLayoutsOnly
             Vector3 office = LobbyPositionAnchors.Office;
             var list = new List<Vector3>
             {
-                new Vector3(-0f, 0f, -5f),
-                new Vector3(-1f, 0f, -5f),
                 new Vector3(-2f, 0f, -5f),
                 new Vector3(-3f, 0f, -5f),
                 new Vector3(-4f, 0f, -5f),
-                new Vector3(-4f, 0f, -4f)
+                new Vector3(-4f, 0f, -4f),
+                new Vector3(-1f, 0f, -5f),
+                new Vector3(-0f, 0f, -5f),
             };
 
             for (int i = 0; i < Mathf.Min(6, 4 + LayoutSizeUpgrades.CalculateEntityCount()); i++)
